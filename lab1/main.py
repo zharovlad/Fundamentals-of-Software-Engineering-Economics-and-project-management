@@ -199,3 +199,5 @@ if __name__ == '__main__':
     result = inc(define_max(find_solution(matrix, probability)))
 
     print_message('\nВ результате анализа всех критериев, делаем вывод, что наиболее оптимальные стратегии это ' + str(result))
+
+
