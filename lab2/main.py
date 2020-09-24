@@ -4,23 +4,64 @@
 # T - продолжительность работы
 
 from math import inf
+from copy import deepcopy
 
 input_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab2\\input.txt'
 
 output_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab2\\output.txt'
 
+# индексы фиктивных вершин
+
+fict_start_index = -1000
+fict_finish_index = -1001
+
 
 class App:
     def __init__(self):
         self.jobs = []      # работы (дуги)
-        self.start = []     # начальные события
-        self.finish = []    # конечные события
+        self.start = []     # начальные события (вершины)
+        self.finish = []    # конечные события (вершины)
+        self.full_ways = [] # список полных путей
         self.reading()
+
+        App.print_message_in_out_file('Входные данные\n',True)
+        App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
+        self.print_jobs()
+
         self.get_rid_of_cycles()
         self.detect_start()
-        self.detect_finish()      
+        self.define_start()
+        self.detect_finish()
+        self.define_finish()
 
+        # После того, как сделали одно стартовое и одно конечное событие - частично упорядочим список работ
+        self.partly_sort()
+        App.print_message_in_out_file('\nЧастично упорядочили\n')
+        App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
+        self.print_jobs()
+        self.find_full_ways(i=self.start, j=self.finish)
+        App.print_message_in_out_file('\nПолные пути\n')
+        self.print_ways()
+
+    @staticmethod
+    def print_message_in_out_file(message, clear_file=False):
+        """ Печать сообщения в выходной файл output_file_name 
+        clear_file - флаг, нужно очищать выходной файл или нет, по умолчанию False """
+        if clear_file:
+            with open(output_file_name, 'w') as w:
+                pass
+        with open(output_file_name, 'a') as w:
+            w.write(message)
+
+    def print_ways(self):
+        for way in self.full_ways:
+            App.print_message_in_out_file(str(way[0]) + '  длина пути = ' + str(way[1]) + '\n')
     
+    def print_jobs(self):
+        for job in self.jobs:
+            App.print_message_in_out_file('%10d%10d%10d\n' % (job.start, job.finish, job.time))
+            
+
     def reading(self):
         """ Чтение данных из входного файла """
         with open(input_file_name, 'r') as r:
@@ -36,6 +77,9 @@ class App:
             if new_job.start == job.start:
                 if new_job.finish == job.finish:
                     if new_job.time != job.time:
+                        # если начальная и конечная вершина одинаковые, а время не дублируется, то просим выбрать пользователя
+                        # какое время нужно оставить
+                        # если время не дублируется - то переходим к следующей дуге, не добавляя текущую
                         time = inf
                         while time != new_job.time and time != job.time:
                             print('Ошибка. Работа: ' + str(job.start) + ' - ' + str(job.finish) + ' дублируется, но имеет два веса: ' + str(new_job.time) + ' и ' + str(job.time) + '. Выбрать нужное')
@@ -83,7 +127,10 @@ class App:
 
     
     def detect_start(self):
-        """ Определить начальные события """
+        """ Определить начальные события.
+        Событие начальное, если до него не требуется выполнение никаких работ """
+        
+        self.start = []
         for job in self.jobs:
             if not (job.start in self.start):
                 self.start.append(job.start)
@@ -95,7 +142,9 @@ class App:
     
 
     def detect_finish(self):
-        """ Определить конечные события """
+        """ Определить конечные события.
+        Событие конечное, если после него не требуется выпонение никаких работ """
+        self.finish = []
         for job in self.jobs:
             if not (job.finish in self.finish):
                 self.finish.append(job.finish)
@@ -104,33 +153,133 @@ class App:
                 self.finish.remove(job.start)
             except:
                 pass
+
+    
+    def define_start(self):
+        """ Сделать одно начальное событие """
+
+        # информативные сообщения
+        mess_several_starts = 'Несколько начальных событий. \n \
+            1 - Удаление одного из событий \n \
+            2 - Добавить фиктивную вершину \n'
+
+        while len(self.start) != 1:
+            print(mess_several_starts)
+            # удаляем событие или делаем фиктивную вершину в соответствии с запросами пользователя
+            if response_user(1, 2) == 1:
+                self.delete_vertex(fict_start_index)
+            else:
+                self.add_vertex(fict_start_index)
+
+
+    def define_finish(self):
+        """ Сделать одно начальное событие """
+
+        # информативные сообщения
+        mess_several_finishes = 'Несколько конечных событий. \n \
+            1 - Удаление одного из событий \n \
+            2 - Добавить фиктивную вершину \n'
+
+        while len(self.finish) != 1:
+            print(mess_several_finishes)
+            # удаляем событие или делаем фиктивную вершину в соответствии с запросами пользователя
+            if response_user(1, 2) == 1:
+                self.delete_vertex(fict_finish_index)
+            else:
+                self.add_vertex(fict_finish_index)
     
 
+    def add_vertex(self, index):
+        """ Добавляет фиктивную вершину, чтобы было одно начальное и одно конечное событие """
+        if index == fict_start_index:
+            self.start = sorted(self.start, reverse=True)
+            for each in self.start:
+                self.jobs.insert(0, Job([index, each, 0]))
+            self.start.clear()
+            self.start.append(index)
+        else:
+            for each in self.finish:
+                self.jobs.append(Job([each, index, 0]))
+            self.finish.clear()
+            self.finish.append(index)
+
+    
+    def delete_vertex(self, index):
+        """ Удаляет одну из начальных или конечных вершин по выбору пользователя """
+        new_list = []
+        if index == fict_start_index:
+            new_list = self.start
+        else:
+            new_list = self.finish
+        ask_message = 'Какую вершину вы хотите удалить? ' + str(new_list)
+        error = 'Ошибка, данной вершины нет, повторите ввод ' + str(new_list)
+
+        print(ask_message)
+        try:
+            del_vertex = int(input())
+        except:
+            del_vertex = index
+
+        while not del_vertex in new_list:
+            print(error)
+            try:
+                del_vertex = int(input())
+            except:
+                del_vertex = index
+        self.delete_jobs_with_vertex(del_vertex)
+    
+
+    def delete_jobs_with_vertex(self, vertex):
+        """ Удаляет все дуги с данной вершиной и для полученного графа пересчитывает начальные и конечные вершины """
+        for i in range(len(self.jobs)):
+            if self.jobs[i].start == vertex or self.jobs[i].finish == vertex:
+                self.jobs.pop(i)
+                i = i - 1
+        self.detect_start()
+        self.detect_finish()
+        for each in self.jobs:
+            each.print()
+
+
+    def partly_sort(self):
+        """ Частичное упорядочивание """
+        old_list = self.jobs
+        new_list = []
+        self.start = self.start[0]
+        self.finish = self.finish[0]
+        stack = [self.start]
+        while len(stack):
+            i = 0
+            while i < len(old_list):
+                if stack[0] == old_list[i].start:
+                    if not old_list[i].finish in stack:
+                        stack.append(old_list[i].finish)
+                    new_list.append(old_list[i])
+                    old_list.pop(i)
+                else:
+                    i = i + 1
+            stack.pop(0)
+        self.jobs = new_list
+
+    
+    def find_full_ways(self, i, j, way=[], lenght=0):
+        """ Нахождение полных путей в графе """
+        way.append(i)
+        if i == j:
+            self.full_ways.append([deepcopy(way), lenght])
+            return
+        for job in self.jobs:
+            if i == job.start:
+                self.find_full_ways(i=job.finish, j=j, way=way, lenght=lenght+job.time)
+                way.pop()
+
+        
 class Job:
     def __init__(self, ABT):
         self.start = ABT[0]
         self.finish = ABT[1]
         self.time = ABT[2]
-
-
-def define_start(start):
-    """ Сделать одно начальное событие """
-
-    # информативные сообщения
-
-    mess_several_starts = 'Несколько начальных событий. \n \
-        1 - Удаление одного из событий \n \
-        2 - Добавить фиктивную вершину \n'
-
-    while len(start) != 1:
-        print(mess_several_starts)
-        if response_user(1, 2) == 1:
-            pass # удаление одного из событий
-        else:
-            pass # добавление вершины
-    
-    return start[0]
-        
+       
 
 def response_user(start, finish):
     """ Повторять, пока не получим нужный ответ от пользователя """    
