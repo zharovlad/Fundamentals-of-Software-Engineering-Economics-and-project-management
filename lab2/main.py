@@ -68,7 +68,10 @@ class App:
             for line in r:
                 _line = line.split()
                 _line = [int(element) for element in _line]
-                self.check_job(Job(_line))
+                if _line[0] == _line[1]:
+                    print('Ошибка. Дуга ' + str(_line) + ' удалена')
+                else:
+                    self.check_job(Job(_line))
                 
 
     def check_job(self, new_job):
@@ -231,14 +234,14 @@ class App:
 
     def delete_jobs_with_vertex(self, vertex):
         """ Удаляет все дуги с данной вершиной и для полученного графа пересчитывает начальные и конечные вершины """
-        for i in range(len(self.jobs)):
+        i = 0
+        while i < len(self.jobs):
             if self.jobs[i].start == vertex or self.jobs[i].finish == vertex:
                 self.jobs.pop(i)
-                i = i - 1
+            else:
+                i += 1
         self.detect_start()
         self.detect_finish()
-        for each in self.jobs:
-            each.print()
 
 
     def partly_sort(self):
@@ -257,7 +260,7 @@ class App:
                     new_list.append(old_list[i])
                     old_list.pop(i)
                 else:
-                    i = i + 1
+                    i += 1
             stack.pop(0)
         self.jobs = new_list
 
