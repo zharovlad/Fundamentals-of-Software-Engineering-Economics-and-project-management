@@ -24,24 +24,6 @@ class App:
         self.full_ways = [] # список полных путей
         self.reading()
 
-        App.print_message_in_out_file('Входные данные\n',True)
-        App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
-        self.print_jobs()
-
-        self.get_rid_of_cycles()
-        self.detect_start()
-        self.define_start()
-        self.detect_finish()
-        self.define_finish()
-
-        # После того, как сделали одно стартовое и одно конечное событие - частично упорядочим список работ
-        self.partly_sort()
-        App.print_message_in_out_file('\nЧастично упорядочили\n')
-        App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
-        self.print_jobs()
-        self.find_full_ways(i=self.start, j=self.finish)
-        App.print_message_in_out_file('\nПолные пути\n')
-        self.print_ways()
 
     @staticmethod
     def print_message_in_out_file(message, clear_file=False):
@@ -295,5 +277,27 @@ def response_user(start, finish):
             print(incorrect_answer)
     return response
 
-App()
-    
+
+if __name__ == "__main__":
+    lab = App()
+
+    App.print_message_in_out_file('Входные данные\n',True)
+    App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
+    lab.print_jobs()
+
+    lab.get_rid_of_cycles()
+    lab.detect_start()
+    lab.define_start()
+    lab.detect_finish()
+    lab.define_finish()
+
+    # После того, как сделали одно стартовое и одно конечное событие - частично упорядочим список работ
+    lab.partly_sort()
+    App.print_message_in_out_file('\nЧастично упорядочили\n')
+    App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
+
+    lab.print_jobs()
+    lab.find_full_ways(i=lab.start, j=lab.finish)
+    App.print_message_in_out_file('\nПолные пути\n')
+    lab.print_ways()
+        
