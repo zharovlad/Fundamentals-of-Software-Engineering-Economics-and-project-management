@@ -22,7 +22,6 @@ class App:
         self.start = []     # начальные события (вершины)
         self.finish = []    # конечные события (вершины)
         self.full_ways = [] # список полных путей
-        self.reading()
 
 
     @staticmethod
@@ -280,7 +279,8 @@ def response_user(start, finish):
 
 if __name__ == "__main__":
     lab = App()
-
+    
+    lab.reading()
     App.print_message_in_out_file('Входные данные\n',True)
     App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
     lab.print_jobs()
