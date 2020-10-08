@@ -4,10 +4,6 @@ import sys
 sys.path.append('C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab2')
 import lab2
 
-input_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab3\\input.txt'
-
-lab2.output_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab3\\output.txt'
-
 class NewApp(lab2.App):
     
     def __init__(self):
@@ -17,10 +13,13 @@ class NewApp(lab2.App):
         self.early_time = {}
         self.late_time = {}
         self.inverse_jobs = []
+        self.input_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab3\\input.txt'
+
+        self.output_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab3\\output.txt'
     
     def reading(self):
         """ Чтение данных из входного файла """
-        with open(input_file_name, 'r') as r:
+        with open(self.input_file_name, 'r') as r:
             for line in r:
                 _line = line.split()
                 _line = [int(element) for element in _line]
@@ -76,18 +75,20 @@ class NewApp(lab2.App):
 
     def print_times_param(self):
         """ Печатает таблицу "Параметры событий СГ" """
-        NewApp.print_message_in_out_file('\nПараметры событий СГ\n')
-        NewApp.print_message_in_out_file('%10s%10s%10s%10s\n' % ('Событие', 'Ранний', 'Поздний', 'Резерв'))
-        list_keys = list(self.early_time.keys())
-        list_keys.sort()
+        self.print_message_in_out_file('\nПараметры событий СГ\n')
+        self.print_message_in_out_file('%10s%10s%10s%10s\n' % ('Событие', 'Ранний', 'Поздний', 'Резерв'))
+        items = list(self.early_time.items())
+        items.sort(key=lambda x: x[1])
+        self.early_time = dict(items)
+        list_keys = self.early_time.keys()
         for key in list_keys:
-            NewApp.print_message_in_out_file('%10d%10d%10d%10d\n' % (key, self.early_time[key], self.late_time[key],
+            self.print_message_in_out_file('%10d%10d%10d%10d\n' % (key, self.early_time[key], self.late_time[key],
             self.late_time[key] - self.early_time[key]))
 
 
     def print_lenght_crit_way(self):
         """ Определение и печать длины критического пути """
-        NewApp.print_message_in_out_file('\nДлина критического пути = %d\n' % (self.early_time[self.finish]))
+        self.print_message_in_out_file('\nДлина критического пути = %d\n' % (self.early_time[self.finish]))
 
     
     def params(self):
@@ -99,19 +100,19 @@ class NewApp(lab2.App):
 
     def print_jobs_param(self):
         """ Печатает таблицу "Параметры работ СГ" """
-        NewApp.print_message_in_out_file('\nПараметры работ СГ\n')
-        NewApp.print_message_in_out_file('%20s%20s%10s%15s\n' % ('Работа', 'Продолжительность', 'Полный', 'Независимый'))
+        self.print_message_in_out_file('\nПараметры работ СГ\n')
+        self.print_message_in_out_file('%20s%20s%10s%15s\n' % ('Работа', 'Продолжительность', 'Полный', 'Независимый'))
         for job in self.jobs:
-            NewApp.print_message_in_out_file('%20s%20d%10d%15d\n' % ('[' + str(job.start) + ' - ' + str(job.finish) + ']', 
+            self.print_message_in_out_file('%20s%20d%10d%15d\n' % ('[' + str(job.start) + ' - ' + str(job.finish) + ']', 
             job.time, job.full, job.independent))
 
     def print_jobs_crit_ways(self):
         """ Печатает список работ всех критических путей СГ, которые определяются с учетом необходимого и достаточного условия отнесения пути к критическому """
-        NewApp.print_message_in_out_file('\nCписок работ всех критических путей СГ\n')
-        NewApp.print_message_in_out_file('%20s%20s%10s%15s\n' % ('Работа', 'Продолжительность', 'Полный', 'Независимый'))
+        self.print_message_in_out_file('\nCписок работ всех критических путей СГ\n')
+        self.print_message_in_out_file('%20s%20s%10s%15s\n' % ('Работа', 'Продолжительность', 'Полный', 'Независимый'))
         for job in self.jobs:
             if job.full == 0:
-                NewApp.print_message_in_out_file('%20s%20d%10d%15d\n' % ('[' + str(job.start) + ' - ' + str(job.finish) + ']', 
+                self.print_message_in_out_file('%20s%20d%10d%15d\n' % ('[' + str(job.start) + ' - ' + str(job.finish) + ']', 
                 job.time, job.full, job.independent))
 
 
@@ -131,8 +132,8 @@ if __name__ == "__main__":
     lab.detect_finish()
     lab.define_finish()
     lab.partly_sort()
-    NewApp.print_message_in_out_file('Исходный список работ сетевого графика\n', True)
-    NewApp.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
+    lab.print_message_in_out_file('Исходный список работ сетевого графика\n', True)
+    lab.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
     lab.print_jobs()
 
     # определим сроки совершения событий

@@ -6,16 +6,6 @@
 from math import inf
 from copy import deepcopy
 
-input_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab2\\input.txt'
-
-output_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab2\\output.txt'
-
-# индексы фиктивных вершин
-
-fict_start_index = -1000
-fict_finish_index = -1001
-
-
 class App:
     def __init__(self):
         self.jobs = []      # работы (дуги)
@@ -23,29 +13,37 @@ class App:
         self.finish = []    # конечные события (вершины)
         self.full_ways = [] # список полных путей
 
+        self.input_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab2\\input.txt'
 
-    @staticmethod
-    def print_message_in_out_file(message, clear_file=False):
+        self.output_file_name = 'C:\\Users\\Влад\\Desktop\\7 semester\\Fundamentals-of-Software-Engineering-Economics-and-project-management-1\\lab2\\output.txt'
+
+        # индексы фиктивных вершин
+
+        self.fict_start_index = -1000
+        self.fict_finish_index = -1001
+
+
+    def print_message_in_out_file(self, message, clear_file=False):
         """ Печать сообщения в выходной файл output_file_name 
         clear_file - флаг, нужно очищать выходной файл или нет, по умолчанию False """
         if clear_file:
-            with open(output_file_name, 'w') as w:
+            with open(self.output_file_name, 'w') as w:
                 pass
-        with open(output_file_name, 'a') as w:
+        with open(self.output_file_name, 'a') as w:
             w.write(message)
 
     def print_ways(self):
         for way in self.full_ways:
-            App.print_message_in_out_file(str(way[0]) + '  длина пути = ' + str(way[1]) + '\n')
+            self.print_message_in_out_file(str(way[0]) + '  длина пути = ' + str(way[1]) + '\n')
     
     def print_jobs(self):
         for job in self.jobs:
-            App.print_message_in_out_file('%10d%10d%10d\n' % (job.start, job.finish, job.time))
+            self.print_message_in_out_file('%10d%10d%10d\n' % (job.start, job.finish, job.time))
             
 
     def reading(self):
         """ Чтение данных из входного файла """
-        with open(input_file_name, 'r') as r:
+        with open(self.input_file_name, 'r') as r:
             for line in r:
                 _line = line.split()
                 _line = [int(element) for element in _line]
@@ -151,9 +149,11 @@ class App:
             print(mess_several_starts)
             # удаляем событие или делаем фиктивную вершину в соответствии с запросами пользователя
             if response_user(1, 2) == 1:
-                self.delete_vertex(fict_start_index)
+                self.delete_vertex(self.fict_start_index)
             else:
-                self.add_vertex(fict_start_index)
+                self.add_vertex(self.fict_start_index)
+        
+        self.start = self.start[0]
 
 
     def define_finish(self):
@@ -168,14 +168,16 @@ class App:
             print(mess_several_finishes)
             # удаляем событие или делаем фиктивную вершину в соответствии с запросами пользователя
             if response_user(1, 2) == 1:
-                self.delete_vertex(fict_finish_index)
+                self.delete_vertex(self.fict_finish_index)
             else:
-                self.add_vertex(fict_finish_index)
+                self.add_vertex(self.fict_finish_index)
+        
+        self.finish = self.finish[0]
     
 
     def add_vertex(self, index):
         """ Добавляет фиктивную вершину, чтобы было одно начальное и одно конечное событие """
-        if index == fict_start_index:
+        if index == self.fict_start_index:
             self.start = sorted(self.start, reverse=True)
             for each in self.start:
                 self.jobs.insert(0, Job([index, each, 0]))
@@ -191,7 +193,7 @@ class App:
     def delete_vertex(self, index):
         """ Удаляет одну из начальных или конечных вершин по выбору пользователя """
         new_list = []
-        if index == fict_start_index:
+        if index == self.fict_start_index:
             new_list = self.start
         else:
             new_list = self.finish
@@ -229,8 +231,6 @@ class App:
         """ Частичное упорядочивание """
         old_list = self.jobs
         new_list = []
-        self.start = self.start[0]
-        self.finish = self.finish[0]
         stack = [self.start]
         while len(stack):
             i = 0
@@ -281,8 +281,8 @@ if __name__ == "__main__":
     lab = App()
     
     lab.reading()
-    App.print_message_in_out_file('Входные данные\n',True)
-    App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
+    lab.print_message_in_out_file('Входные данные\n',True)
+    lab.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
     lab.print_jobs()
 
     lab.get_rid_of_cycles()
@@ -293,11 +293,11 @@ if __name__ == "__main__":
 
     # После того, как сделали одно стартовое и одно конечное событие - частично упорядочим список работ
     lab.partly_sort()
-    App.print_message_in_out_file('\nЧастично упорядочили\n')
-    App.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
+    lab.print_message_in_out_file('\nЧастично упорядочили\n')
+    lab.print_message_in_out_file('%10s%10s%10s\n' % ('A', 'B', 't'))
 
     lab.print_jobs()
     lab.find_full_ways(i=lab.start, j=lab.finish)
-    App.print_message_in_out_file('\nПолные пути\n')
+    lab.print_message_in_out_file('\nПолные пути\n')
     lab.print_ways()
         
